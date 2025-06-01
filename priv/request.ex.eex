@@ -1,0 +1,82 @@
+# codegen: do not edit
+defmodule GenDAP.Requests.<%= DAPCodegen.Naming.name(@request) %>Request do<%= if @request.documentation do %>
+  @moduledoc """
+  <%= String.replace(@request.documentation, "\n", "\n  ") %>
+
+  Message Direction: <%= @request.message_direction %>
+  """<% end %>
+
+  import Schematic, warn: false
+
+  use TypedStruct
+
+  @doc """
+  ## Fields
+  <%= for p <- @properties do %>
+  * <%= format_property_name(p.name) %><%= if p.documentation do %>: <%= String.replace(p.documentation, "\n", "\n    ") %><% end %><% end %>
+  """
+
+  typedstruct do
+    @typedoc "A type defining DAP request <%= @request.command %>"
+
+    field :seq, integer(), enforce: true
+    field :type, String.t(), default: "request"
+    field :command, String.t(), default: "<%= @request.command %>"<%= unless @arguments == :none do %>
+    field :arguments, <%= DAPCodegen.Codegen.to_string(@arguments, @metamodel) %><%= if @request.arguments_required do %>, enforce: true<% end %><% end %>
+  end
+
+  @doc false
+  @spec schematic() :: Schematic.t()
+  def schematic() do
+    schema(__MODULE__, %{
+      :seq => int(),
+      :type => "request",
+      :command => "<%= @request.command %>",<%= unless @arguments == :none do %><%= if @request.arguments_required do %>
+      :arguments => <%= DAPCodegen.Schematic.to_string(@arguments, @metamodel) %><% else %>
+      optional(:arguments) => <%= DAPCodegen.Schematic.to_string(@arguments, @metamodel) %><% end %><% end %>
+    })
+  end
+end
+
+defmodule GenDAP.Requests.<%= DAPCodegen.Naming.name(@request) %>Response do<%= if @request.response_documentation do %>
+  @moduledoc """
+  <%= String.replace(@request.response_documentation, "\n", "\n  ") %>
+
+  Message Direction: <%= @request.response_direction %>
+  """<% end %>
+
+  import Schematic, warn: false
+
+  use TypedStruct
+
+  @doc """
+  ## Fields
+  <%= for p <- @response_properties do %>
+  * <%= format_property_name(p.name) %><%= if p.documentation do %>: <%= String.replace(p.documentation, "\n", "\n    ") %><% end %><% end %>
+  """
+
+  typedstruct do
+    @typedoc "A type defining DAP request <%= @request.command %> response"
+
+    field :seq, integer(), enforce: true
+    field :type, String.t(), default: "response"
+    field :request_seq, integer(), enforce: true
+    field :success, boolean(), default: true
+    field :command, String.t(), default: "<%= @request.command %>"<%= unless @body == :none do %>
+    field :body, <%= DAPCodegen.Codegen.to_string(@body, @metamodel) %><%= if @request.body_required do %>, enforce: true<% end %><% end %>
+  end
+
+  @doc false
+  @spec schematic() :: Schematic.t()
+  def schematic() do
+    schema(__MODULE__, %{
+      :seq => int(),
+      :type => "response",
+      :request_seq => int(),
+      :success => true,
+      :command => "<%= @request.command %>",<%= unless @body == :none do %><%= if @request.body_required do %>
+      :body => <%= DAPCodegen.Schematic.to_string(@body, @metamodel) %><% else %>
+      optional(:body) => <%= DAPCodegen.Schematic.to_string(@body, @metamodel) %><% end %><% end %>
+    })
+  end
+end

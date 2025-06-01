@@ -1,0 +1,24 @@
+# codegen: do not edit
+defmodule GenDAP.Enumerations.<%= DAPCodegen.Naming.name(@enumeration) %> do<%= if @enumeration.documentation do %>
+  @moduledoc """
+  <%= String.replace(@enumeration.documentation, "\n", "\n  ") %>
+  """<% end %>
+
+  @typedoc "A type defining DAP enumeration <%= @enumeration.name %>"
+  @type t :: <%= @type %><%= if @enumeration.extensible and @enumeration.type.name != :string do %> | <%= DAPCodegen.Codegen.to_string(@enumeration.type, @metamodel) %><% end %>
+
+  import Schematic, warn: false
+
+  <%= for v <- @values do %><%= if v.documentation do %>@doc """
+  <%= String.replace(v.documentation, "\n", "\n  ") %>
+  """<% end %>
+  @spec <%= Macro.underscore(v.name) %>() :: <%= if(@enumeration.type.name == :string, do: "String.t()", else: v.value) %>
+  def <%= Macro.underscore(v.name) %>, do: <%= inspect(v.value) %>
+  <% end %>
+  @doc false
+  @spec schematic() :: Schematic.t()
+  def schematic() do
+    oneof([<%= for v <- @values do %>
+      <%= DAPCodegen.Schematic.to_string(v, @metamodel) %>,<% end %><%= if @enumeration.extensible do %> <%= DAPCodegen.Schematic.to_string(@enumeration.type, @metamodel) %><% end %>])
+  end
+end
