@@ -23,7 +23,8 @@ defmodule DAPCodegen.MixProject do
     [
       {:jason, "~> 1.4"},
       {:typed_struct, "~> 0.3"},
-      {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
+      {:spec_lint, "~> 0.1", only: [:dev, :test], runtime: false}
     ]
   end
 end
